@@ -1,49 +1,44 @@
 class Node:
-    def __init__(self, move,depth,currentNumber, personScore, computerScore, bank, turn): 
+    def __init__(self, number, player_score, pc_score, bank, is_pc_turn):
+        self.number = number
+        self.player_score = player_score
+        self.pc_score = pc_score
+        self.bank = bank
+        self.is_pc_turn = is_pc_turn
+
         self.children = []
-        self.depth = depth
-        self.currentNumber = currentNumber
-        self.personScore = personScore
-        self.computerScore = computerScore
-        self.bank = bank 
-        self.turn = turn # 1 for player, 0 for computer
-        self.move = move # 2 or 3 or 4
+        self.value = None
+        self.move = None  # 2 or 3 or 4
 
+    def generate_children(self):
+        for move in [2, 3, 4]:
+            number = self.number // move
+            player_score = self.player_score
+            pc_score = self.pc_score
+            bank = self.bank
 
-
-    def generateChildNodes(self):
-        if self.currentNumber <= 10:
-            return
-        
-        for i in [2,3,4]:
-            newNumber = self.currentNumber // i
-            newPersonScore = self.personScore
-            newComputerScore = self.computerScore
-            newTurn = self.turn
-            newBank = self.bank
-            if(newNumber % 2 == 0 and self.turn == 1):
-                newPersonScore -= 1
-            elif(newNumber % 2 != 0 and self.turn == 1):
-                newPersonScore += 1
-            elif(newNumber % 2 == 0 and self.turn == 0):
-                newComputerScore -= 1
-            elif(newNumber % 2 != 0 and self.turn == 0):
-                newComputerScore += 1
-            if(newNumber % 5 == 0):
-                newBank += 1
-
-
-            if self.turn == 1:
-                newTurn = 0
+            if number % 2 == 0:
+                if self.is_pc_turn:
+                    pc_score -= 1
+                else:
+                    player_score -= 1
             else:
-                newTurn = 1
+                if self.is_pc_turn:
+                    pc_score += 1
+                else:
+                    player_score += 1
 
+            if number % 10 in [0, 5]:
+                bank += 1
 
-            childNode = Node(i,self.depth+1,newNumber,newPersonScore,newComputerScore,newBank,newTurn)
-            self.children.append(childNode)
+            child = Node(
+                number,
+                player_score,
+                pc_score,
+                bank,
+                not self.is_pc_turn
+            )
 
-
-
-            
-
+            child.move = move
+            self.children.append(child)
 

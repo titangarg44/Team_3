@@ -1,12 +1,14 @@
 import tkinter as tk
 import random
+from Node import Node
+from minimax import build_tree, minimax, get_best_move_from_tree
 
 current_number = None
 
 player_score = 0
 pc_score = 0 
 
-bank_stack = []
+bank = 0
 
 def generate_numbers():
     numbers = []
@@ -166,8 +168,9 @@ def update_score(number, is_player=True):
     
 
 # Game Fuction
+
 def divide(divisor, is_player=True):
-    global current_number, bank_stack
+    global current_number, bank
 
     current_number //= divisor
     label.config(text=f"Current Number: {current_number}")
@@ -175,17 +178,22 @@ def divide(divisor, is_player=True):
     update_score(current_number, is_player=is_player)
 
     if current_number % 10 in [0, 5]:
-        bank_stack.append(1)
-        bank_label.config(text=f"Bank: {len(bank_stack)}")
+        bank += 1
+        bank_label.config(text=f"Bank: {bank}")
 
- 
     if current_number <= 10:
-        end_game()
+        end_game(is_player)
         return
 
 
     if is_player:
-        pc_divisor = random.choice([2, 3, 4])
+        root = Node(current_number, player_score, pc_score, bank, True)
+
+        build_tree(root)
+        minimax(root)
+
+        pc_divisor = get_best_move_from_tree(root)
+        print(f"PC chooses to divide by {pc_divisor}")
         divide(pc_divisor, is_player=False) 
 
 # End of the Game
@@ -197,23 +205,28 @@ result_label = tk.Label(result_frame, text="", bg="#6A0DAD", fg="white", font=("
 result_label.pack(pady=20)
 
 # End Function
-def end_game():
-    global player_score, pc_score, bank_stack
+def end_game(last_player):
+    global player_score, pc_score, bank
 
-    player_score += sum(bank_stack)
-    bank_stack.clear()
-    bank_label.config(text="Bank: 0")
+    if last_player:
+        player_score += bank
+    else:
+        pc_score += bank
 
-    result_text = f"Your Score: {player_score} vs  PC Score: {pc_score}"
+    bank = 0
+    # bank_label.config(text="Bank: 0")
+
+    result_text = f"Your Score: {player_score} vs  PC Score: {pc_score}\n"
     if player_score > pc_score:
         result_text += "You Win!"
     elif pc_score > player_score:
         result_text += "\nPC Win!"
     else:
         result_text += "\nDraw"
-    
+
     import tkinter.messagebox as msg
     msg.showinfo("Game Over", result_text)
+
 
 # Button
 btn2 = tk.Button(game_frame, text="Divide by 2", bg="white", fg="black", font=("Arial", 14, "bold"), width=15, height=2)
