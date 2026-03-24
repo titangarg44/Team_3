@@ -18,3 +18,4 @@ To-Do:
 1. Implementation of Alpha-Beta algorithm
 2. Implementation of Restart possibility
 3. Implementation of choosing an algorithm in every round
+4. Implementation of choosing who starts the game (human or PC)
