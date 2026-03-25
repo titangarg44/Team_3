@@ -13,12 +13,15 @@ def minimax(node):
     # terminal node
     if node.number <= 10 or not node.children:
         # give bank to last player
-        if node.is_pc_turn:
-            node.pc_score += node.bank
-        else:
-            node.player_score += node.bank
+        pc_score = node.pc_score
+        player_score = node.player_score
 
-        node.value = node.pc_score - node.player_score
+        if node.is_pc_turn:
+            pc_score += node.bank
+        else:
+            player_score += node.bank
+
+        node.value = pc_score - player_score
         return node.value
 
     if node.is_pc_turn:

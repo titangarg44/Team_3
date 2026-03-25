@@ -2,6 +2,7 @@ import tkinter as tk
 import random
 from Node import Node
 from minimax import build_tree, minimax, get_best_move_from_tree
+from alphabeta import alpha_beta
 
 current_number = None
 
@@ -167,7 +168,7 @@ label = tk.Label(
 label.pack(pady=30)
 
 # Score Label
-score_frame= tk.Frame(game_frame, bg="#6A0DAD")
+score_frame = tk.Frame(game_frame, bg="#6A0DAD")
 score_frame.pack(pady=10)
 
 # PC Label
@@ -190,6 +191,7 @@ player_label = tk.Label(
 )
 player_label.pack(side="right", padx=50)
 
+
 # Score Function
 def update_score(number, is_player=True):
     global player_score, pc_score
@@ -198,7 +200,7 @@ def update_score(number, is_player=True):
         if is_player:
             player_score -= 1
         else:
-            pc_score -= 1 
+            pc_score -= 1
     else:
         if is_player:
             player_score += 1
@@ -207,7 +209,7 @@ def update_score(number, is_player=True):
 
     pc_label.config(text=f"PC:{pc_score}")
     player_label.config(text=f"You:{player_score}")
-    
+
 
 # Game Function
 
@@ -227,7 +229,6 @@ def divide(divisor, is_player=True):
         end_game(is_player)
         return
 
-
     if is_player:
         tree_root = Node(current_number, player_score, pc_score, bank, True)
 
@@ -236,20 +237,21 @@ def divide(divisor, is_player=True):
         if algorithm == "minimax":
             minimax(tree_root)
         elif algorithm == "alphabeta":
-            print("Not yet implemented")
-            return
+            alpha_beta(tree_root, -float("inf"), float("inf"))
 
         pc_divisor = get_best_move_from_tree(tree_root)
 
         print(f"PC chooses to divide by {pc_divisor}")
-        divide(pc_divisor, is_player=False) 
+        divide(pc_divisor, is_player=False)
+
+    # End Frame
 
 
-# End Frame
 result_frame = tk.Frame(root, bg="#6A0DAD")
 
 result_label = tk.Label(result_frame, text="", bg="#6A0DAD", fg="white", font=("Arial", 17, "bold"))
 result_label.pack(pady=20)
+
 
 def end_game(last_player):
     global player_score, pc_score, bank
