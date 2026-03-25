@@ -2,7 +2,6 @@ import tkinter as tk
 import random
 from Node import Node
 from minimax import build_tree, minimax, get_best_move_from_tree
-from alphabeta import alpha_beta
 
 current_number = None
 
@@ -10,7 +9,6 @@ player_score = 0
 pc_score = 0 
 algorithm = None
 bank = 0
-pending_pc_move = False
 
 def generate_numbers():
     generated_numbers = []
@@ -22,19 +20,25 @@ def generate_numbers():
 
 def start_game():
     start_frame.pack_forget()
+    player_frame.pack(pady=20)
+
+# a window to pick the starting player
+def choose_beginner(player):
+    global picked_player
+    picked_player = player
+
+    player_frame.pack_forget()
     numbers_frame.pack(pady=20)
+
 
 def choose_number(number):
     global current_number
     current_number = number
 
     numbers_frame.pack_forget()
-    game_frame.pack(pady=20)
+    algorithm_frame.pack(pady=20)
 
     label.config(text=f"Current Number: {current_number}")
-
-
-
 
 root = tk.Tk()
 root.title("Game")
@@ -105,13 +109,49 @@ for i, num in enumerate(numbers):
     )
     btn.grid(row=0, column=i, padx=10)
 
+
+# Who begins?
+
+player_frame = tk.Frame(root, bg="#6A0DAD")
+
+player_title = tk.Label(
+    player_frame,
+    text="Choose who begins to play",
+    bg="#6A0DAD",
+    fg="white",
+    font=("Arial", 20, "bold")
+)
+player_title.pack(pady=40)
+
+btn_human = tk.Button(
+    player_frame,
+    text="Human Player",
+    font=("Arial", 16, "bold"),
+    width=15,
+    height=4,
+    command=lambda: choose_beginner("human")
+)
+
+btn_ai = tk.Button(
+    player_frame,
+    text="Computer begins",
+    font=("Arial", 16, "bold"),
+    width=15,
+    height=4,
+    command=lambda: choose_beginner("ai")
+)
+
+btn_human.pack(side="left", padx=20)
+btn_ai.pack(side="left", padx=20)
+
+
 # Algorithm selection screen
 
 algorithm_frame = tk.Frame(root, bg="#6A0DAD")
 
 algorithm_title = tk.Label(
     algorithm_frame,
-    text="Choose algorithm for PC move",
+    text="Choose an algorithm",
     bg="#6A0DAD",
     fg="white",
     font=("Arial", 20, "bold")
@@ -119,34 +159,25 @@ algorithm_title = tk.Label(
 algorithm_title.pack(pady=40)
 
 def choose_algorithm(algo):
-    global algorithm, pending_pc_move
-
+    global algorithm
     algorithm = algo
 
     algorithm_frame.pack_forget()
     game_frame.pack(pady=20)
 
-    if pending_pc_move:
-        make_pc_move()
+    if picked_player == "ai":
+        tree_root = Node(current_number, player_score, pc_score, bank, False)
 
-def make_pc_move():
-    global pending_pc_move
+        build_tree(tree_root)
 
-    tree_root = Node(current_number, player_score, pc_score, bank, True)
-    build_tree(tree_root)
+        if algorithm == "minimax":
+            minimax(tree_root)
+        elif algorithm == "alphabeta":
+            print("Not yet implemented")
+            return
 
-    if algorithm == "minimax":
-        minimax(tree_root)
-    elif algorithm == "alphabeta":
-        alpha_beta(tree_root, -float("inf"), float("inf"))
-
-    pc_divisor = get_best_move_from_tree(tree_root)
-
-    print(f"PC chooses to divide by {pc_divisor}")
-    pc_info_label.config(text=f"PC divides by {pc_divisor}")
-
-    pending_pc_move = False
-    divide(pc_divisor, is_player=False)
+        pc_divisor = get_best_move_from_tree(tree_root)
+        divide(pc_divisor, is_player=False)
 
 btn_minimax = tk.Button(
     algorithm_frame,
@@ -194,16 +225,8 @@ label = tk.Label(
 )
 label.pack(pady=30)
 
-pc_info_label = tk.Label(
-    game_frame,
-    text= "PC's move...",
-    bg= "#6A0DAD",
-    fg= "white",
-    font= ("Arial", 14, "bold")
-)
-pc_info_label.pack(pady=10)
 # Score Label
-score_frame = tk.Frame(game_frame, bg="#6A0DAD")
+score_frame= tk.Frame(game_frame, bg="#6A0DAD")
 score_frame.pack(pady=10)
 
 # PC Label
@@ -226,7 +249,6 @@ player_label = tk.Label(
 )
 player_label.pack(side="right", padx=50)
 
-
 # Score Function
 def update_score(number, is_player=True):
     global player_score, pc_score
@@ -235,7 +257,7 @@ def update_score(number, is_player=True):
         if is_player:
             player_score -= 1
         else:
-            pc_score -= 1
+            pc_score -= 1 
     else:
         if is_player:
             player_score += 1
@@ -244,7 +266,7 @@ def update_score(number, is_player=True):
 
     pc_label.config(text=f"PC:{pc_score}")
     player_label.config(text=f"You:{player_score}")
-
+    
 
 # Game Function
 
@@ -264,20 +286,29 @@ def divide(divisor, is_player=True):
         end_game(is_player)
         return
 
-    if is_player:
-        global pending_pc_move
-        pending_pc_move = True
 
-        game_frame.pack_forget()
-        algorithm_frame.pack(pady=20)
+    if is_player:
+        tree_root = Node(current_number, player_score, pc_score, bank, True)
+
+        build_tree(tree_root)
+
+        if algorithm == "minimax":
+            minimax(tree_root)
+        elif algorithm == "alphabeta":
+            print("Not yet implemented")
+            return
+
+        pc_divisor = get_best_move_from_tree(tree_root)
+
+        print(f"PC chooses to divide by {pc_divisor}")
+        divide(pc_divisor, is_player=False) 
+
 
 # End Frame
-
 result_frame = tk.Frame(root, bg="#6A0DAD")
 
 result_label = tk.Label(result_frame, text="", bg="#6A0DAD", fg="white", font=("Arial", 17, "bold"))
 result_label.pack(pady=20)
-
 
 def end_game(last_player):
     global player_score, pc_score, bank
@@ -302,7 +333,7 @@ def end_game(last_player):
     msg.showinfo("Game Over", result_text)
 
 
-# Button
+# Buttons
 btn2 = tk.Button(game_frame, text="Divide by 2", bg="white", fg="black", font=("Arial", 14, "bold"), width=15, height=2)
 btn3 = tk.Button(game_frame, text="Divide by 3", bg="white", fg="black", font=("Arial", 14, "bold"), width=15, height=2)
 btn4 = tk.Button(game_frame, text="Divide by 4", bg="white", fg="black", font=("Arial", 14, "bold"), width=15, height=2)
