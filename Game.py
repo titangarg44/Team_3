@@ -10,6 +10,7 @@ player_score = 0
 pc_score = 0 
 algorithm = None
 bank = 0
+pending_pc_move = False
 
 def generate_numbers():
     generated_numbers = []
@@ -28,7 +29,7 @@ def choose_number(number):
     current_number = number
 
     numbers_frame.pack_forget()
-    algorithm_frame.pack(pady=20)
+    game_frame.pack(pady=20)
 
     label.config(text=f"Current Number: {current_number}")
 
@@ -107,7 +108,7 @@ algorithm_frame = tk.Frame(root, bg="#6A0DAD")
 
 algorithm_title = tk.Label(
     algorithm_frame,
-    text="Choose an algorithm",
+    text="Choose algorithm for PC move",
     bg="#6A0DAD",
     fg="white",
     font=("Arial", 20, "bold")
@@ -115,11 +116,33 @@ algorithm_title = tk.Label(
 algorithm_title.pack(pady=40)
 
 def choose_algorithm(algo):
-    global algorithm
+    global algorithm, pending_pc_move
+
     algorithm = algo
 
     algorithm_frame.pack_forget()
     game_frame.pack(pady=20)
+
+    if pending_pc_move:
+        make_pc_move()
+
+def make_pc_move():
+    global pending_pc_move
+
+    tree_root = Node(current_number, player_score, pc_score, bank, True)
+    build_tree(tree_root)
+
+    if algorithm == "minimax":
+        minimax(tree_root)
+    elif algorithm == "alphabeta":
+        alpha_beta(tree_root, -float("inf"), float("inf"))
+
+    pc_divisor = get_best_move_from_tree(tree_root)
+
+    print(f"PC chooses to divide by {pc_divisor}")
+
+    pending_pc_move = False
+    divide(pc_divisor, is_player=False)
 
 btn_minimax = tk.Button(
     algorithm_frame,
@@ -230,22 +253,13 @@ def divide(divisor, is_player=True):
         return
 
     if is_player:
-        tree_root = Node(current_number, player_score, pc_score, bank, True)
+        global pending_pc_move
+        pending_pc_move = True
 
-        build_tree(tree_root)
+        game_frame.pack_forget()
+        algorithm_frame.pack(pady=20)
 
-        if algorithm == "minimax":
-            minimax(tree_root)
-        elif algorithm == "alphabeta":
-            alpha_beta(tree_root, -float("inf"), float("inf"))
-
-        pc_divisor = get_best_move_from_tree(tree_root)
-
-        print(f"PC chooses to divide by {pc_divisor}")
-        divide(pc_divisor, is_player=False)
-
-    # End Frame
-
+# End Frame
 
 result_frame = tk.Frame(root, bg="#6A0DAD")
 
