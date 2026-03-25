@@ -33,6 +33,9 @@ def choose_number(number):
 
     label.config(text=f"Current Number: {current_number}")
 
+
+
+
 root = tk.Tk()
 root.title("Game")
 
@@ -140,6 +143,7 @@ def make_pc_move():
     pc_divisor = get_best_move_from_tree(tree_root)
 
     print(f"PC chooses to divide by {pc_divisor}")
+    pc_info_label.config(text=f"PC divides by {pc_divisor}")
 
     pending_pc_move = False
     divide(pc_divisor, is_player=False)
@@ -190,6 +194,14 @@ label = tk.Label(
 )
 label.pack(pady=30)
 
+pc_info_label = tk.Label(
+    game_frame,
+    text= "PC's move...",
+    bg= "#6A0DAD",
+    fg= "white",
+    font= ("Arial", 14, "bold")
+)
+pc_info_label.pack(pady=10)
 # Score Label
 score_frame = tk.Frame(game_frame, bg="#6A0DAD")
 score_frame.pack(pady=10)
