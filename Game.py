@@ -160,6 +160,40 @@ btn_ai = tk.Button(
 btn_human.pack(side="left", padx=20)
 btn_ai.pack(side="left", padx=20)
 
+# PC THINKING FRAME
+
+pc_thinking_frame = tk.Frame(root, bg="#c29fd5")
+pc_thinking_title = tk.Label(
+    pc_thinking_frame,
+    text="PC is thinking...",
+    bg="#c29fd5",
+    fg="black",
+    font=("Arial", 20, "bold")
+)
+pc_thinking_title.pack(pady=70)
+
+pc_thinking_button = tk.Button(
+    pc_thinking_frame,
+    text="Next",
+    bg="white",
+    fg="black",
+    state="disabled",
+    width=10,
+    height=3,
+    font=("Arial", 16, "bold"),
+    command=lambda: return_to_game()
+)
+pc_thinking_button.pack(padx=30)
+
+def return_to_game():
+    pc_thinking_frame.pack_forget()
+    game_frame.pack(fill="both", expand=True)
+
+    divide(pc_divisor, is_player=False)
+
+def show_pc_choice():
+    pc_thinking_title.config(text=f"PC chose to divide by {pc_divisor}")
+    pc_thinking_button.config(state="normal")
 
 # Algorithm selection screen
 
@@ -186,7 +220,13 @@ def choose_algorithm(algo):
         make_pc_move()
 
 def make_pc_move():
-    global pending_pc_move
+    global pending_pc_move, pc_divisor
+
+    game_frame.forget()
+    pc_thinking_frame.pack(pady=20)
+
+    pc_thinking_title.config(text="PC is thinking...")
+    pc_thinking_button.config(state="disabled")
 
     tree_root = Node(current_number, player_score, pc_score, bank, True)
     build_tree(tree_root)
@@ -200,8 +240,9 @@ def make_pc_move():
 
     print(f"PC chooses to divide by {pc_divisor}")
 
+    root.after(1000, show_pc_choice)
+
     pending_pc_move = False
-    divide(pc_divisor, is_player=False)
 
 btn_minimax = tk.Button(
     algorithm_frame,
