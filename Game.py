@@ -42,6 +42,7 @@ def restart():
     bank_label.config(text="Bank: 0")
     pc_label.config(text="PC: 0")
     player_label.config(text="You: 0")
+    update_number_buttons()
 
     game_frame.pack_forget()
     numbers_frame.pack_forget()
@@ -129,25 +130,37 @@ title = tk.Label(
 )
 title.pack(pady=40)
 
-numbers = generate_numbers()
+def update_number_buttons():
+    numbers = generate_numbers()
+
+    for btn, num in zip(number_buttons, numbers):
+        btn.config(
+            text=str(num),
+            command=lambda n=num: choose_number(n)
+        )
 
 button_frame = tk.Frame(numbers_frame, bg="#c29fd5")
 button_frame.pack(pady=20)
 
-for i, num in enumerate(numbers):
+number_buttons = []
+
+for i in range(5):
     row = i // 3        # 0,0,0,1,1
     col = i % 3         # 0,1,2,0,1
 
     btn = tk.Button(
         button_frame,
-        text=str(num),
+        text='',
         font=("Arial", 14, "bold"),
         width=13,
         bg="white",
         height=4,
-        command=lambda n=num: choose_number(n)
     )
     btn.grid(row=row, column=col, padx=10, pady=10)
+    number_buttons.append(btn)
+
+update_number_buttons()
+
 
 
 # Who begins?
@@ -246,7 +259,7 @@ def choose_algorithm(algo):
 def make_pc_move():
     global pending_pc_move, pc_divisor
 
-    game_frame.forget()
+    game_frame.pack_forget()
     pc_thinking_frame.pack(pady=20)
 
     pc_thinking_title.config(text="PC is thinking...")
@@ -397,10 +410,9 @@ def divide(divisor, is_player=True):
     global current_number, bank
 
     before_move = current_number
+
     current_number //= divisor
     label.config(text=f"Current Number: {current_number}")
-
-    prev_number_label.config(text=f"Number in a previous round: {previous_number}")
 
     update_score(current_number, is_player=is_player)
 
@@ -414,7 +426,6 @@ def divide(divisor, is_player=True):
 
     if is_player:
         player_move_label.config(text=f"Your previous choice: ÷{divisor}")
-        prev_number_label.config(text=f"Number before your choice: {before_move}")
     else:
         pc_move_label.config(text=f"PC's previous choice: ÷{divisor}")
         prev_number_label.config(text=f"Number before PC choice: {before_move}")
