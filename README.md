@@ -9,4 +9,4 @@ What is done:
 - Change interface
 
 To-Do:
-__1. Implementation of Restart possibility__
+1. Implementation of Restart possibility
