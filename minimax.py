@@ -1,5 +1,11 @@
 from Node import Node
 
+"""
+Builds a game tree from the current node to the max depth
+@param node - the current node
+@param depth - current depth
+@param max_depth - the maximal depth that can be rechead in the tree
+"""
 def build_tree(node, depth=0, max_depth=6):
     if node.number <= 10 or depth >= max_depth:
         return
@@ -9,6 +15,11 @@ def build_tree(node, depth=0, max_depth=6):
     for child in node.children:
         build_tree(child, depth + 1, max_depth)
 
+"""
+Evaluates the game tree, based on the minimax algorithm
+@param node - current node to evaluate
+@return - value of the nodes
+"""
 def minimax(node):
     # terminal node
     if node.number <= 10 or not node.children:
@@ -44,6 +55,11 @@ def minimax(node):
         node.value = best
         return best
 
+"""
+Picks the best move for the pc from the root note
+@param root - root node of game tree
+@return returns the best move for 
+"""
 def get_best_move_from_tree(root):
     best_value = -float("inf")
     best_move = None
@@ -54,4 +70,3 @@ def get_best_move_from_tree(root):
             best_move = child.move
 
     return best_move
-

@@ -4,8 +4,19 @@ from Node import Node
 from minimax import build_tree, minimax, get_best_move_from_tree
 from alphabeta import alpha_beta
 
+"""
+Initializes the start variables of the game and returns them.
 
-def starting():   #creating a function which imply of the starting state of the game
+@return: 
+- current_number(current number to play with): start with none
+- player_score(score of the player): starts with zero
+- algorithm(picked algorithm): starts with none
+- bank(points added to the bank): start with zero
+- pending_pc_move(decides if the PC needs to make a move): starts with false
+- starting_number(the number the game started with): starts with none
+- previous_number(the number which was the previous turn played with): starts with none
+"""
+def starting():
     current_number = None
     player_score = 0
     pc_score = 0 
@@ -15,9 +26,15 @@ def starting():   #creating a function which imply of the starting state of the 
     starting_number = None
     previous_number = None
     return current_number, player_score, pc_score, algorithm, bank, pending_pc_move, starting_number, previous_number
+
+# Set all variables to their initial values, given in starting
 current_number, player_score, pc_score, algorithm, bank, pending_pc_move, starting_number, previous_number = starting()
     
+"""
+creates an empty list and stores fives number in there, which are devideable by 12
 
+@return: generated_numbers - The generated list
+"""
 def generate_numbers():
     generated_numbers = []
     while len(generated_numbers) < 5:
@@ -26,14 +43,21 @@ def generate_numbers():
             generated_numbers.append(number)
     return generated_numbers
 
+"""
+opens the starting frame for the game
+"""
 def start_game():
     start_frame.pack_forget()
     player_frame.pack(pady=20)
 
+"""
+resets the game variables to zero/none and clears the user interface as well
+"""
 def restart():
+    #variables
     global current_number, player_score, pc_score, algorithm, bank, pending_pc_move, starting_number, previous_number
     current_number, player_score, pc_score, algorithm, bank, pending_pc_move, starting_number, previous_number = starting() #makes these variable the same as the one in starting function
-# these lines make the label in the window to their original state as well
+    #ui
     label.config(text="Current Number: 0")
     start_label.config(text="Starting number: -")
     prev_number_label.config(text="Number in a previous round: -")
@@ -51,7 +75,11 @@ def restart():
 
     start_frame.pack(pady=20)
 
-# a window to pick the starting player
+"""
+Window to pick the starting player and updating the ui
+
+@param player - player choosen to begin
+"""
 def choose_beginner(player):
     global picked_player
     picked_player = player
@@ -59,7 +87,12 @@ def choose_beginner(player):
     player_frame.pack_forget()
     numbers_frame.pack(pady=20)
 
+"""
+Updates the ui to display the game numbers
+Calls function make_pc_move, if ai was picked as starting player
 
+@param number - chosen number to begin with
+"""
 def choose_number(number):
     global current_number, starting_number, pending_pc_move
     current_number = number
@@ -76,7 +109,9 @@ def choose_number(number):
         make_pc_move()
         
       
-
+"""
+Initializing of a window with the name 'Game' for the UI
+"""
 root = tk.Tk()
 root.title("Game")
 
@@ -91,11 +126,11 @@ y = (screen_height // 2) - (window_height // 2)
 root.geometry(f"{window_width}x{window_height}+{x}+{y}")
 root.configure(bg="#c29fd5")  # Deep purple
 
-# START SCREEN
-
+"""
+Initializes the starting screen for the ui
+"""
 start_frame = tk.Frame(root, bg="#c29fd5")
 start_frame.pack(pady=20)
-
 title = tk.Label(
     start_frame,
     text = "WELCOME",
@@ -104,7 +139,7 @@ title = tk.Label(
     font = ("Arial", 40, "bold")
 )
 title.pack(pady=60)
-
+#Start button - Calls start_game, when pressed
 start_btn = tk.Button(
     start_frame,
     text="Start the game!",
@@ -117,8 +152,9 @@ start_btn = tk.Button(
 )
 start_btn.pack(pady=40)
 
-# 5 NUMBERS SCREEN
-
+"""
+Initializes the screen for the starting number selection
+"""
 numbers_frame = tk.Frame(root, bg="#c29fd5")
 
 title = tk.Label(
@@ -130,9 +166,11 @@ title = tk.Label(
 )
 title.pack(pady=40)
 
+"""
+fills the buttons to choose the first number with the generated numbers from generate_numbers()
+"""
 def update_number_buttons():
     numbers = generate_numbers()
-
     for btn, num in zip(number_buttons, numbers):
         btn.config(
             text=str(num),
@@ -163,8 +201,7 @@ update_number_buttons()
 
 
 
-# Who begins?
-
+# Window to pick human or AI player to make first move
 player_frame = tk.Frame(root, bg="#c29fd5")
 
 player_title = tk.Label(
@@ -197,8 +234,7 @@ btn_ai = tk.Button(
 btn_human.pack(side="left", padx=20)
 btn_ai.pack(side="left", padx=20)
 
-# PC THINKING FRAME
-
+# Window to display the ai evaluating it's next move
 pc_thinking_frame = tk.Frame(root, bg="#c29fd5")
 pc_thinking_title = tk.Label(
     pc_thinking_frame,
@@ -222,18 +258,23 @@ pc_thinking_button = tk.Button(
 )
 pc_thinking_button.pack(padx=30)
 
+"""
+clears the previous "pc thinking"-window and provides human player with next move options
+"""
 def return_to_game():
     pc_thinking_frame.pack_forget()
     game_frame.pack(fill="both", expand=True)
 
     divide(pc_divisor, is_player=False)
 
+"""
+shows what move the ai picked
+"""
 def show_pc_choice():
     pc_thinking_title.config(text=f"PC chose to divide by {pc_divisor}")
     pc_thinking_button.config(state="normal")
 
-# Algorithm selection screen
-
+# Window to select the ai model
 algorithm_frame = tk.Frame(root, bg="#c29fd5")
 
 algorithm_title = tk.Label(
@@ -245,6 +286,10 @@ algorithm_title = tk.Label(
 )
 algorithm_title.pack(pady=40)
 
+"""
+Sets the picked algorithm
+@param algo - by the human player selected algorithm
+"""
 def choose_algorithm(algo):
     global algorithm, pending_pc_move
 
@@ -256,6 +301,10 @@ def choose_algorithm(algo):
     if pending_pc_move:
         make_pc_move()
 
+"""
+makes the move of the ai, based on the chosen algorithm and the best possible move from the algorithm
+also shows what the ai chose to do in his move
+"""
 def make_pc_move():
     global pending_pc_move, pc_divisor
 
@@ -281,6 +330,7 @@ def make_pc_move():
 
     pending_pc_move = False
 
+# Button for the algorithms
 btn_minimax = tk.Button(
     algorithm_frame,
     text="Minimax",
@@ -289,7 +339,6 @@ btn_minimax = tk.Button(
     height=4,
     command=lambda: choose_algorithm("minimax")
 )
-
 btn_alphabeta = tk.Button(
     algorithm_frame,
     text="Alpha-Beta",
@@ -303,8 +352,7 @@ btn_minimax.pack(side="left", padx=20)
 btn_alphabeta.pack(side="left", padx=20)
 
 
-# GAME SCREEN
-
+# Main window for the game
 game_frame = tk.Frame(root, bg="#c3b4ca")
 
 main_container = tk.Frame(game_frame, bg="#c3b4ca")
@@ -385,7 +433,11 @@ pc_info_label = tk.Label(
 )
 pc_info_label.pack(pady=10)
 
-# Score Function
+"""
+updates the score, based on the picked devision and the outcome number
+@param number - played number
+@param is_player - checks if it is the turn of the player or ai
+"""
 def update_score(number, is_player=True):
     global player_score, pc_score
 
@@ -404,8 +456,11 @@ def update_score(number, is_player=True):
     player_label.config(text=f"You:{player_score}")
 
 
-# Game Function
-
+"""
+Devide the chosen number and updates the window and it's modules
+@param divisor - the number which devides the current game number
+@param is_player - checks if it is the turn of the player or ai
+"""
 def divide(divisor, is_player=True):
     global current_number, bank
 
@@ -440,14 +495,16 @@ def divide(divisor, is_player=True):
         game_frame.pack_forget()
         algorithm_frame.pack(pady=20)
 
-# End Frame
-
+# Result window
 result_frame = tk.Frame(root, bg="#6A0DAD")
 
 result_label = tk.Label(result_frame, text="", bg="#6A0DAD", fg="white", font=("Arial", 17, "bold"))
 result_label.pack(pady=20)
 
-
+"""
+Adds the game bank to the last player and updates the window
+@param last_player - checks which player was the last to add the game bank to
+"""
 def end_game(last_player):
     global player_score, pc_score, bank
 
@@ -473,21 +530,22 @@ def end_game(last_player):
         root.quit()
     else:
         restart()
-        
 
 
 
-# Button
+# Initializes devision and restart button
 btn2 = tk.Button(right_frame, text="Divide by 2", bg="white", fg="black", font=("Arial", 14, "bold"), width=15, height=2)
 btn3 = tk.Button(right_frame, text="Divide by 3", bg="white", fg="black", font=("Arial", 14, "bold"), width=15, height=2)
 btn4 = tk.Button(right_frame, text="Divide by 4", bg="white", fg="black", font=("Arial", 14, "bold"), width=15, height=2)
-
+rbtn = tk.Button(left_frame, text="Restart Game", bg="black", fg="white", font=("Arial", 14, "bold"), width=15, height=2)
 btn2.pack(pady=10)
 btn3.pack(pady=10)
 btn4.pack(pady=10)
-
+rbtn.pack(pady=10)
 btn2.config(command=lambda: divide(2))
 btn3.config(command=lambda: divide(3))
 btn4.config(command=lambda: divide(4))
+rbtn.config(command=restart)
 
+# Mainloop to call all windows and buttons
 root.mainloop()
